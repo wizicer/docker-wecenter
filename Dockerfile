@@ -1,24 +1,26 @@
 FROM php:apache
 MAINTAINER Icer
 
-# Install plugins
-RUN apt-get update && \
-  apt-get -y install php5-gd && \
-  apt-get -y install php5-curl && \
-  apt-get -y install curl && \
-  apt-get -y install unzip && \
-  rm -rf /var/lib/apt/lists/*
+# install dependency
+RUN apt-get update && apt-get install -y \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libmcrypt-dev \
+    libpng12-dev
 
-RUN curl -o WeCenter_3-1-7.zip -SL http://www.wecenter.com/download/WeCenter_3-1-7.zip \
-    && unzip WeCenter_3-1-7.zip -d WeCenter \
-    && mv WeCenter/UPLOAD/*  /app \
-    && rm -rf WeCenter/* \
-    && rm -rf WeCenter_3-1-7.zip
+RUN docker-php-ext-install -j$(nproc) iconv mcrypt \
+    && docker-php-ext-install -j$(nproc) pdo_mysql \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd
+
+COPY ./app /var/www/html/
 
 # Modify permissions to allow plugin upload
-RUN mkdir /app/tmp && mkdir /app/cache && chmod -R 777 /app/tmp && chmod -R 777 /app/cache
+RUN mkdir /var/www/html/tmp \
+    && mkdir /var/www/html/cache \
+    && chmod -R 777 /var/www/html/tmp \
+    && chmod -R 777 /var/www/html/cache \
+    && ln -s /var/www/html /app
 
-RUN chown -R www-data:www-data /app/system
+RUN chown -R www-data:www-data /var/www/html/system
 VOLUME  ["/app/uploads","/app/system_bak"]
-
-CMD ["/run.sh"]
