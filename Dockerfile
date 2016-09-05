@@ -23,4 +23,6 @@ RUN mkdir /var/www/html/tmp \
     && ln -s /var/www/html /app
 
 RUN chown -R www-data:www-data /var/www/html/system
-VOLUME  ["/app/uploads","/app/system_bak"]
+VOLUME  ["/app/uploads","/app/system_bak","/var/www/html/system/config"]
+RUN chown -R www-data:www-data /var/www/html/system/config
+COPY ./app/system/config/* /var/www/html/system/config/

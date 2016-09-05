@@ -8,6 +8,7 @@ wecenter:
   volumes:
     - /srv/wecenter/uploads:/app/uploads
     - /srv/wecenter/system_bak:/app/system_bak
+    - /srv/wecenter/config:/var/www/html/system/config
 db:
   restart: always
   image: mysql
